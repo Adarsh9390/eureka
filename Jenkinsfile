@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.8.7'  // Ensure this Maven version is configured in Jenkins
+        maven 'Maven-3.8.7'  // Must match the name in Global Tool Configuration
     }
 
     environment {
