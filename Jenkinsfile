@@ -2,13 +2,18 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.8.7'  // Use the configured Maven version
+        maven 'Maven-3.8.7'  // Ensure this Maven version is configured in Jenkins
+    }
+
+    environment {
+        IMAGE_NAME = "eureka-server"
+        CONTAINER_NAME = "eureka-server-container"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Adarsh9390/eureka.git'
+                git branch: 'main', url: 'https://github.com/Adarsh9390/eureka.git'
             }
         }
 
@@ -18,9 +23,28 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn test'
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Stop and remove existing container if running
+                    sh '''
+                    docker stop $CONTAINER_NAME || true
+                    docker rm $CONTAINER_NAME || true
+                    docker run -d --name $CONTAINER_NAME -p 8761:8761 $IMAGE_NAME
+                    '''
+                }
+            }
+        }
+
+        stage('Clean Up Old Docker Images') {
+            steps {
+                sh 'docker image prune -f'
             }
         }
     }
