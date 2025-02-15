@@ -8,6 +8,7 @@ pipeline {
     environment {
         IMAGE_NAME = "eureka-server"
         CONTAINER_NAME = "eureka-server-container"
+        SONARQUBE_SERVER = "SonarQube"  // Must match the name in Jenkins Global Tool Configuration
     }
 
     stages {
@@ -20,6 +21,14 @@ pipeline {
         stage('Build with Maven') {
             steps {
                 sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv(SONARQUBE_SERVER) {
+                    sh 'mvn sonar:sonar'
+                }
             }
         }
 
